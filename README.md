@@ -40,7 +40,7 @@ Before you begin, make sure you have:
 4. You can SCP the file over from your Rasberry Pi to your local host.
    >scp pi@raspberrypi.local:/path/to/example.txt ~/Downloads/
 5. On Visual Studio Code Editior, you can then save the 2 CSV files together with the DisplayPlot.c file.
-6. To visualise the graph in the pictorial version, enter the following codes in the VSC Terminal.
+6. To visualise the graph in the pictorial representation, enter the following codes in the VSC Terminal.
    >gcc -o DisplayPlot DisplayPlot.c
    
    >.\DisplayPlot  
