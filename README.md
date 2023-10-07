@@ -42,6 +42,7 @@ Before you begin, make sure you have:
 5. On Visual Studio Code Editior, you can then save the 2 CSV files together with the DisplayPlot.c file.
 6. To visualise the graph in the pictorial version, enter the following codes in the VSC Terminal.
    >gcc -o DisplayPlot DisplayPlot.c
+   
    >.\DisplayPlot  
 7. With that, an Waveform.png file will be created which will show the dataset in a Data Analyst POV!
 
