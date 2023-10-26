@@ -1,0 +1,5 @@
+  gcc -o NewStudent NewStudent.c       - compile
+ ./NewStudent
+ 
+ gcc -o Display Display.c       - compile
+ ./Display

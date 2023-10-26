@@ -46,7 +46,7 @@ int main() {
             fprintf(gnuplotPipe, "set origin 0.0,0.5\n");
             fprintf(gnuplotPipe, "set size 1,0.5\n");
             fprintf(gnuplotPipe, "set ylabel 'High and Low State'\n");
-            fprintf(gnuplotPipe, "plot 'green_waveform_data.csv' using 1:2 with steps title '(%s)' linecolor 'red'\n", data1Name);
+            fprintf(gnuplotPipe, "plot 'green_waveform_data.csv' using 1:2 with steps title '(%s)' linecolor 'dark-green'\n", data1Name);
 
             // Second subplot
             fprintf(gnuplotPipe, "set origin 0.0,0.0\n");
@@ -68,3 +68,4 @@ int main() {
 
     return 0;
 }
+

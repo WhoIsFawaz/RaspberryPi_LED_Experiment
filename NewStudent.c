@@ -365,7 +365,9 @@ void blinkLedWithConfig(int blinkLed, int blinkFrequency, int blinkBrightness) {
     unsigned long previousMillis = 0;
     int ledState = LOW;
 
-    for (int blink = 0; blink < 600;) {
+    int loopDuration = 60 * blinkFrequency
+
+    for (int blink = 0; blink < loopDuration;) {
         unsigned long currentMillis = millis();
 
         if (currentMillis - previousMillis >= onOffTime) {
