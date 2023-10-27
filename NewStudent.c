@@ -364,9 +364,9 @@ void blinkLedWithConfig(int blinkLed, int blinkFrequency, int blinkBrightness) {
     // Blinking
     unsigned long previousMillis = 0;
     int ledState = LOW;
-
-    int loopDuration = 60 * blinkFrequency
-
+    
+    int loopDuration = 60 * blinkFrequency;
+        
     for (int blink = 0; blink < loopDuration;) {
         unsigned long currentMillis = millis();
 
@@ -382,18 +382,19 @@ void blinkLedWithConfig(int blinkLed, int blinkFrequency, int blinkBrightness) {
             blink++;
             digitalWrite(blinkLed, ledState);
 
-            // Record waveform data
-            data.timestamp = (blinkLed == GREEN) ? greenTimestamp : redTimestamp;
-            if (blinkLed == GREEN) {
-                data.greenState = ledState;
-                writeWaveformDataGreen(data, blinkFrequency, blinkBrightness);
-                greenTimestamp += onOffTime;
-            } else {
-                data.redState = ledState;
-                writeWaveformDataRed(data, blinkFrequency, blinkBrightness);
-                redTimestamp += onOffTime;
+            // Record waveform data for every 20ms
+            for (int step = 0; step < onOffTime; step += 20) {
+                data.timestamp = (blinkLed == GREEN) ? greenTimestamp : redTimestamp;
+                if (blinkLed == GREEN) {
+                    data.greenState = ledState;
+                    writeWaveformDataGreen(data, blinkFrequency, blinkBrightness);
+                    greenTimestamp += 20;
+                } else {
+                    data.redState = ledState;
+                    writeWaveformDataRed(data, blinkFrequency, blinkBrightness);
+                    redTimestamp += 20;
+                }
             }
-            
         }
     }
 }
