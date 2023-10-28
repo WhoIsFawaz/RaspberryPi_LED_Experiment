@@ -392,17 +392,21 @@ void blinkLedWithConfig(int blinkLed, int blinkFrequency, int blinkDutyCycle, in
     unsigned long previousMillis = 0;
     int ledState = LOW;
     
-    int loopDuration = 60 * blinkFrequency;
+    int loopDuration = 7 * blinkFrequency;
         
     for (int blink = 0; blink < loopDuration;) {
         unsigned long currentMillis = millis();
 
         if (ledState == LOW) {
+            printf("led state low\n");
+            printf("current time (%i) - previous time (%i) >= on duration\n", currentMillis, previousMillis, onDuration);
             if (currentMillis - previousMillis >= frequencyDuration) {
+                printf("new freequency cycle\n");
                 previousMillis = currentMillis;
 
                 ledState = HIGH;
                 softPwmWrite(blinkLed, blinkBrightness);
+                printf("led on\n");
                 
                 blink++;
                 digitalWrite(blinkLed, ledState);
@@ -422,9 +426,13 @@ void blinkLedWithConfig(int blinkLed, int blinkFrequency, int blinkDutyCycle, in
                 }
             }
         } else {
+            printf("led state high\n");
+            printf("current time (%i) - previous time (%i) >= on duration\n", currentMillis, previousMillis, onDuration);
             if (currentMillis - previousMillis >= onDuration) {
+                printf("new freequency cycle\n");
                 ledState = LOW;
                 softPwmWrite(blinkLed, blinkBrightness);
+                printf("led off\n");
             }
         }
     }
