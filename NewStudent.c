@@ -137,7 +137,6 @@ void blink();
 int getBlinkLed();
 
 int getBlinkFrequency();
-
 int getBlinkBrightness();
 
 int confirmBlinkSelection();
@@ -561,7 +560,6 @@ int getBlinkFrequency() {
 
 
 /* 
-
 Menu to get user selction on LED brightness
 
 */
@@ -637,7 +635,6 @@ int confirmBlinkSelection(int blinkLed, int blinkFrequency, int blinkBrightness)
     printf("LED to blink: %s\n", blinkLedString);
 
     printf("Blink Frequency: %dHz\n", blinkFrequency);
-
     printf("Blink Brightness: %d%%\n\n", blinkBrightness);
 
     printf("[1] Confirm Configuration\n");
@@ -783,7 +780,6 @@ void blinkLedWithConfig(int blinkLed, int blinkFrequency, int blinkBrightness) {
                 }
 
             }
-
         }
 
     }
