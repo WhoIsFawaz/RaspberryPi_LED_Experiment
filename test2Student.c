@@ -43,7 +43,6 @@ VERSION_CODENAME=buster
 /* DEFINITIONS */
 #define RED 27      // GPIO Pin 27
 #define GREEN 13    // GPIO Pin 13
-#define ALL 1       // Both GPIO Pins 27 and 13
 
 // Program States
 #define TURN_OFF 0
@@ -55,9 +54,6 @@ VERSION_CODENAME=buster
 #define BLINK_GREEN 1
 #define BLINK_RED 2
 #define CONFIRM 1
-
-#define TIMESTAMP_START 10000   // Start of timestamp
-#define BLINK_DURATION 60    // Duration of in seconds
 
 // File to store waveform data
 #define WAV_FILEGreen "green_waveform_data.csv"
@@ -72,7 +68,6 @@ void turnOnLeds();
 void blink();
 int getBlinkLed();
 int getBlinkFrequency();
-int getBlinkDutyCycle();
 int getBlinkBrightness();
 int confirmBlinkSelection();
 void blinkLedWithConfig();
@@ -90,13 +85,12 @@ typedef struct {
 /* ... (rest of the code remains unchanged) ... */
 
 // Add a function to write waveform data of GREEN LED to the file
-void writeWaveformDataGreen(WaveformData data, int blinkFrequency, int blinkDutyCycle) {
+void writeWaveformDataGreen(WaveformData data, int blinkFrequency, int blinkBrightness) {
     FILE *file = fopen(WAV_FILEGreen, "a"); // Open file in append mode
 
     if (file != NULL) {
         if (!headersWrittenGreen) {
-            file = freopen(NULL, "w", file);
-            fprintf(file, "Frequency of Green LED is: %dHz & Duty Cycle of Green LED is: %d%\n\n", blinkFrequency, blinkDutyCycle); 
+            fprintf(file, "Frequency of Green LED is: %dHz & Duty Cycle of Green LED is: %d%\n\n", blinkFrequency, blinkBrightness); 
             fprintf(file, "The timestamp in Millisecond | The state of the Green LED | The state of the Red LED\n");
             headersWrittenGreen = 1;
     }
@@ -106,13 +100,12 @@ void writeWaveformDataGreen(WaveformData data, int blinkFrequency, int blinkDuty
 }
 
 // Add a function to write waveform data of RED LED to the file
-void writeWaveformDataRed(WaveformData data, int blinkFrequency, int blinkDutyCycle) {
+void writeWaveformDataRed(WaveformData data, int blinkFrequency, int blinkBrightness) {
     FILE *file = fopen(WAV_FILERed, "a"); // Open file in append mode
 
     if (file != NULL) {
         if (!headersWrittenRed) {
-            file = freopen(NULL, "w", file);
-            fprintf(file, "Frequency of Red LED is: %dHz & Duty Cycle of Red LED is: %d%\n\n", blinkFrequency, blinkDutyCycle); 
+            fprintf(file, "Frequency of Red LED is: %dHz & Duty Cycle of Red LED is: %d%\n\n", blinkFrequency, blinkBrightness); 
             fprintf(file, "The timestamp in Millisecond | The state of the Green LED | The state of the Red LED\n");
             headersWrittenRed = 1;
     }
@@ -123,6 +116,7 @@ void writeWaveformDataRed(WaveformData data, int blinkFrequency, int blinkDutyCy
 
 /* MAIN PROGRAM */
 int main(void) {
+
     setupProgram();
     startProgram();
     endProgram();
@@ -181,7 +175,7 @@ int getUserSelection() {
 
     int selection;
 
-    printf("\n===== LED STUDENT DEVICE =====\n");
+    printf("\n===== LAD STUDENT DEVICE =====\n");
     printf("\n[0] Turn off both LEDs\n");
     printf("[1] Turn on both LEDs\n");
     printf("[2] Blink LED\n");
@@ -224,33 +218,17 @@ It gets from the user the LED to blink, frequency and brightness.
 void blink() {
     system("clear");
     printf("\nBlink...\n");
-
-    int blinkLed = BLINK_RED;
-    int frequency = 1;
-    int dutyCycle = 49;
-    int brightness = 100;
     
-    // int blinkLed = getBlinkLed();
-    // int frequency = getBlinkFrequency();
-    // int dutyCycle = getBlinkDutyCycle();
-    // int brightness = getBlinkBrightness();
+    int blinkLed = getBlinkLed();
+    int frequency = getBlinkFrequency();
+    int brightness = getBlinkBrightness();
 
-    if (confirmBlinkSelection(blinkLed, frequency, dutyCycle, brightness) == CONFIRM) {
+    if (confirmBlinkSelection(blinkLed, frequency, brightness) == CONFIRM) {
 
-        blinkLedWithConfig(blinkLed, frequency, dutyCycle, brightness);
+        blinkLedWithConfig(blinkLed, frequency, brightness);
         system("clear");
 
-    } else {
-        system("clear");
-
-        blinkLed = getBlinkLed();
-        frequency = getBlinkFrequency();
-        dutyCycle = getBlinkDutyCycle();
-        brightness = getBlinkBrightness();
-
-        blinkLedWithConfig(blinkLed, frequency, dutyCycle, brightness);
-        system("clear");
-    };
+    } else return;
 
 }
 
@@ -302,29 +280,6 @@ int getBlinkFrequency() {
 }
 
 /* 
-Menu to get user selction for duty cycle for each blink
-*/
-int getBlinkDutyCycle() {
-
-    int selection;
-
-    printf("Enter the duty cycle for each blink.\n\n");
-    printf("Enter percentage between 0 to 100\n");
-    printf("\nDuty Cycle (%%): ");
-
-    scanf("%d", &selection);
-
-    if (selection < 0 || selection > 100) {
-        system("clear");
-        printf("Invalid Input. Try Again...\n\n");
-        getBlinkDutyCycle();
-    } else {
-        system("clear");
-        return selection;
-    }
-}
-
-/* 
 Menu to get user selction on LED brightness
 */
 int getBlinkBrightness() {
@@ -351,7 +306,7 @@ int getBlinkBrightness() {
 /* 
 Menu for user to acknowldge the blink configurations input
 */
-int confirmBlinkSelection(int blinkLed, int blinkFrequency, int blinkDutyCycle, int blinkBrightness) {
+int confirmBlinkSelection(int blinkLed, int blinkFrequency, int blinkBrightness) {
     
     int selection;
     char blinkLedString[] = "Green";
@@ -363,7 +318,6 @@ int confirmBlinkSelection(int blinkLed, int blinkFrequency, int blinkDutyCycle, 
     printf("Confirm your blink configrations.\n\n");
     printf("LED to blink: %s\n", blinkLedString);
     printf("Blink Frequency: %dHz\n", blinkFrequency);
-    printf("Blink Duty Cycle: %d%%\n", blinkDutyCycle);
     printf("Blink Brightness: %d%%\n\n", blinkBrightness);
     printf("[1] Confirm Configuration\n");
     printf("[0] Return to Home\n");
@@ -374,7 +328,7 @@ int confirmBlinkSelection(int blinkLed, int blinkFrequency, int blinkDutyCycle, 
     if (selection < 0 || selection > 1) {
         system("clear");
         printf("Invalid Input. Try Again...\n\n");
-        confirmBlinkSelection(blinkLed, blinkFrequency, blinkDutyCycle, blinkBrightness);
+        confirmBlinkSelection(blinkLed, blinkFrequency, blinkBrightness);
     } else {
         return selection;
     }
@@ -383,11 +337,13 @@ int confirmBlinkSelection(int blinkLed, int blinkFrequency, int blinkDutyCycle, 
 /* 
 Blinks the LED according to the user configuration
 */
-void blinkLedWithConfig(int blinkLed, int blinkFrequency, int blinkDutyCycle, int blinkBrightness) {
+// Modify blinkLedWithConfig to record waveform data
+// Modify blinkLedWithConfig to record waveform data
+void blinkLedWithConfig(int blinkLed, int blinkFrequency, int blinkBrightness) {
     printf("\nBlinking...\n");
 
-    // Calculate onTime and offTime based on the duty cycle
-    float dutyCycle = (float)blinkDutyCycle / 100.0f;
+    // Calculate onTime and offTime based on the duty cycle (brightness)
+    float dutyCycle = (float)blinkBrightness / 100.0f;
     float cycleTime = 1.0f / blinkFrequency;
     float onTime = cycleTime * dutyCycle * 1000;
     float offTime = cycleTime * (1.0f - dutyCycle) * 1000;
@@ -399,23 +355,23 @@ void blinkLedWithConfig(int blinkLed, int blinkFrequency, int blinkDutyCycle, in
         blinkLed = RED;
     }
 
-    printf("blinkLed %i\n", RED);
-
     // Initialize waveform data
     WaveformData data;
     data.greenState = 0;
     data.redState = 0;
 
     // Initialize timestamps for both LEDs
-    unsigned long greenTimestamp = TIMESTAMP_START;
-    unsigned long redTimestamp = TIMESTAMP_START;
-    unsigned int loopDuration = BLINK_DURATION * blinkFrequency;
+    unsigned long greenTimestamp = 10000;  // Start at 10000 ms
+    unsigned long redTimestamp = 10000;    // Start at 10000 ms
+    unsigned long timestampLimit = 20000;  // Set the timestamp limit to 20,000 ms
+    unsigned long twentyMsTimer = millis();
+
 
     // Blinking
     unsigned long previousMillis = 0;
     int ledState = LOW;
 
-    for (int blink = 0; blink < loopDuration;)  {
+    while (1) {
         unsigned long currentMillis = millis();
 
         if (currentMillis - previousMillis >= (ledState == LOW ? offTime : onTime)) {
@@ -424,98 +380,26 @@ void blinkLedWithConfig(int blinkLed, int blinkFrequency, int blinkDutyCycle, in
             softPwmWrite(blinkLed, ledState == HIGH ? blinkBrightness : 0);
             digitalWrite(blinkLed, ledState);
 
-            // Record waveform data for every 20ms
-            for (int step = 0; step < (ledState == LOW ? offTime : onTime); step += 20) {
-                data.timestamp = (blinkLed == GREEN) ? greenTimestamp : redTimestamp;
-                if (blinkLed == GREEN) {
-                    data.greenState = ledState;
-                    writeWaveformDataGreen(data, blinkFrequency, blinkDutyCycle);
-                    greenTimestamp += 20;
-                } else {
-                    data.redState = ledState;
-                    writeWaveformDataRed(data, blinkFrequency, blinkDutyCycle);
-                    redTimestamp += 20;
-                }
+            // Record waveform data
+            data.timestamp = (blinkLed == GREEN) ? greenTimestamp : redTimestamp;
+
+            if (blinkLed == GREEN) {
+                data.greenState = ledState;
+                writeWaveformDataGreen(data, blinkFrequency, blinkBrightness);
+                greenTimestamp += (ledState == HIGH) ? onTime : offTime;
+            } else {
+                data.redState = ledState;
+                writeWaveformDataRed(data, blinkFrequency, blinkBrightness);
+                redTimestamp += (ledState == HIGH) ? onTime : offTime;
             }
 
-            if (ledState == LOW) {
-                blink++;
+            // Check if the timestamp limit is reached, and exit the loop if true
+            if (data.timestamp >= timestampLimit) {
+                break;
             }
         }
     }
 }
-
-// /* 
-// Blinks the LED according to the user configuration
-// */
-// // Modify blinkLedWithConfig to record waveform data
-// void blinkLedWithConfig(int blinkLed, int blinkFrequency, int blinkDutyCycle, int blinkBrightness) {
-    
-//     printf("\nBlinking...\n");
-
-//     // Setting Frequency
-//     float dutyCycle = (float)blinkDutyCycle / 100.0f;
-//     float onDuration = (1.0f / blinkFrequency) * dutyCycle * 1000;
-//     float offDuration = (1.0f / blinkFrequency) * (1.0f - dutyCycle) * 1000;
-
-//     // Setting Blink LED
-//     if (blinkLed == BLINK_GREEN) {
-//         blinkLed = GREEN;
-//     } else {
-//         blinkLed = RED;
-//     }
-
-//     // Initialize waveform data
-//     WaveformData data;
-//     data.greenState = 0;
-//     data.redState = 0;
-    
-//     // Initialize timestamps for both LEDs
-//     unsigned long greenTimestamp = 10000;  // Start at 10000 ms
-//     unsigned long redTimestamp = 10000;    // Start at 10000 ms
-
-//     // Blinking
-//     unsigned long previousMillis = 0;
-//     int ledState = LOW;
-    
-//     int loopDuration = 7 * blinkFrequency;
-        
-//     for (int blink = 0; blink < loopDuration;) {
-//         unsigned long currentMillis = millis();
-
-//         if (ledState == LOW) {
-//             if (currentMillis - previousMillis >= offDuration) {
-//                 previousMillis = currentMillis;
-
-//                 ledState = HIGH;
-//                 softPwmWrite(blinkLed, blinkBrightness); 
-//                 digitalWrite(blinkLed, ledState);
-//                 blink++;
-
-//                 // Record waveform data for every 20ms
-//                 for (int step = 0; step < (ledState == LOW ? offDuration : onDuration); step += 20) {
-//                     data.timestamp = (blinkLed == GREEN) ? greenTimestamp : redTimestamp;
-//                     if (blinkLed == GREEN) {
-//                         data.greenState = ledState;
-//                         writeWaveformDataGreen(data, blinkFrequency, blinkDutyCycle);
-//                         greenTimestamp += 20;
-//                     } else {
-//                         data.redState = ledState;
-//                         writeWaveformDataRed(data, blinkFrequency, blinkDutyCycle);
-//                         redTimestamp += 20;
-//                     }
-//                 }
-//             }
-//         } else {
-//             if (currentMillis - previousMillis >= onDuration) {
-//                 ledState = LOW;
-//                 softPwmWrite(blinkLed, 0); 
-//                 digitalWrite(blinkLed, ledState);
-//                 blink++;
-//             }
-//         }
-//     }
-// }
 
 /* 
 Resetting and cleaning up before safely exiting the program.
