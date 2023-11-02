@@ -225,32 +225,16 @@ It gets from the user the LED to blink, frequency and brightness.
 void blink() {
     system("clear");
     printf("\nBlink...\n");
-
-    int blinkLed = BLINK_RED;
-    int frequency = 10;
-    int dutyCycle = 50;
-    int brightness = 100;
     
-    // int blinkLed = getBlinkLed();
-    // int frequency = getBlinkFrequency();
-    // int dutyCycle = getBlinkDutyCycle();
-    // int brightness = getBlinkBrightness();
+    int blinkLed = getBlinkLed();
+    int frequency = getBlinkFrequency();
+    int dutyCycle = getBlinkDutyCycle();
+    int brightness = getBlinkBrightness();
 
     if (confirmBlinkSelection(blinkLed, frequency, dutyCycle, brightness) == CONFIRM) {
         blinkLedWithConfig(blinkLed, frequency, dutyCycle, brightness);
         system("clear");
-
-    } else {
-        system("clear");
-
-        blinkLed = getBlinkLed();
-        frequency = getBlinkFrequency();
-        dutyCycle = getBlinkDutyCycle();
-        brightness = getBlinkBrightness();
-
-        blinkLedWithConfig(blinkLed, frequency, dutyCycle, brightness);
-        system("clear");
-    };
+    } else return;
 
 }
 
