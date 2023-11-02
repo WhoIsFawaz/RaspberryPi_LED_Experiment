@@ -78,6 +78,7 @@ void writeWaveformDataGreen(WaveformData data, int blinkFrequency, int blinkBrig
 
     if (file != NULL) {
         if (!headersWrittenGreen) {
+            file = freopen(NULL, "w", file);
             fprintf(file, "Frequency of Green LED is: %dHz & Duty Cycle of Green LED is: %d%%\n\n", blinkFrequency, blinkBrightness); 
             fprintf(file, "The timestamp in Millisecond | The state of the Green LED\n");
             headersWrittenGreen = 1;
@@ -93,6 +94,7 @@ void writeWaveformDataRed(WaveformData data, int blinkFrequency, int blinkBright
 
     if (file != NULL) {
         if (!headersWrittenRed) {
+            file = freopen(NULL, "w", file);
             fprintf(file, "Frequency of Red LED is: %dHz & Duty Cycle of Red LED is: %d%%\n\n", blinkFrequency, blinkBrightness); 
             fprintf(file, "The timestamp in Millisecond | The state of the Red LED\n");
             headersWrittenRed = 1;
