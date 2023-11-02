@@ -81,13 +81,13 @@ typedef struct {
 } WaveformData;
 
 /* Add a function to write waveform data of GREEN LED to the file */
-void writeWaveformDataGreen(WaveformData data, int blinkFrequency, int blinkBrightness) {
+void writeWaveformDataGreen(WaveformData data, int blinkFrequency, int blinkDutyCycle) {
     FILE *file = fopen(WAV_FILEGreen, "a"); // Open file in append mode
 
     if (file != NULL) {
         if (!headersWrittenGreen) {
             file = freopen(NULL, "w", file);
-            fprintf(file, "Frequency of Green LED is: %dHz & Duty Cycle of Green LED is: %d%%\n\n", blinkFrequency, blinkBrightness); 
+            fprintf(file, "Frequency of Green LED is: %dHz & Duty Cycle of Green LED is: %d%%\n\n", blinkFrequency, blinkDutyCycle); 
             fprintf(file, "The timestamp in Millisecond | The state of the Green LED\n");
             headersWrittenGreen = 1;
         }
@@ -97,13 +97,13 @@ void writeWaveformDataGreen(WaveformData data, int blinkFrequency, int blinkBrig
 }
 
 /* Add a function to write waveform data of RED LED to the file */
-void writeWaveformDataRed(WaveformData data, int blinkFrequency, int blinkBrightness) {
+void writeWaveformDataRed(WaveformData data, int blinkFrequency, int blinkDutyCycle) {
     FILE *file = fopen(WAV_FILERed, "a"); // Open file in append mode
 
     if (file != NULL) {
         if (!headersWrittenRed) {
             file = freopen(NULL, "w", file);
-            fprintf(file, "Frequency of Red LED is: %dHz & Duty Cycle of Red LED is: %d%%\n\n", blinkFrequency, blinkBrightness); 
+            fprintf(file, "Frequency of Red LED is: %dHz & Duty Cycle of Red LED is: %d%%\n\n", blinkFrequency, blinkDutyCycle); 
             fprintf(file, "The timestamp in Millisecond | The state of the Red LED\n");
             headersWrittenRed = 1;
         }
@@ -162,11 +162,13 @@ void startProgram() {
 // The main menu that determines what the user wants to do 
 int getUserSelection() {
     int selection;
-    printf(" ____   ____         ____     ____     ____    ____   \n");
-    printf("|    |      |       |        |    |   |    |       |  \n");
-    printf("|____|   ___|       |  ___   |____|   |____|    ___|  \n");
-    printf("|      |            |     |  |    \\   |       |      \n");
-    printf("|      |____        |_____|  |     \\  |       |____   \n");
+    printf(" _______  _______    _______  ______    _______  __   __  _______    _______   \n");
+    printf("|       ||       |  |       ||    _ |  |       ||  | |  ||       |  |       |  \n");
+    printf("|    _  ||____   |  |    ___||   | ||  |   _   ||  | |  ||    _  |  |____   |  \n");
+    printf("|   |_| | ____|  |  |   | __ |   |_||_ |  | |  ||  |_|  ||   |_| |   ____|  |  \n");
+    printf("|    ___|| ______|  |   ||  ||    __  ||  |_|  ||       ||    ___|  | ______|  \n");
+    printf("|   |    | |_____   |   |_| ||   |  | ||       ||       ||   |      | |_____   \n");
+    printf("|___|    |_______|  |_______||___|  |_||_______||_______||___|      |_______|  \n");
 
     printf("\n===== LED STUDENT DEVICE =====\n");
     printf("\n[0] Turn off all LEDs\n");
@@ -340,7 +342,7 @@ int confirmBlinkSelection(int frequencies[NUMBER_OF_LEDS], int dutyCycles[NUMBER
             printf("  - Brightness: %d%%\n", brightness[i]);
         }
     }
-    printf("[1] Confirm Configuration\n");
+    printf("\n[1] Confirm Configuration\n");
     printf("[0] Return to Home\n");
     printf("\nYour Selection: ");
 
@@ -351,6 +353,7 @@ int confirmBlinkSelection(int frequencies[NUMBER_OF_LEDS], int dutyCycles[NUMBER
         printf("Invalid Input. Try Again...\n\n");
         confirmBlinkSelection(frequencies, dutyCycles, brightness);
     } else {
+        system("clear");
         return selection;
     }
 }
