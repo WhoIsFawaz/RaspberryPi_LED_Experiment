@@ -64,7 +64,6 @@ void blink();
 void blinkAll();
 int getBlinkLed();
 int getBlinkFrequency();
-// int getBlinkDutyCycle();
 int getBlinkBrightness();
 int confirmBlinkSelection();
 void blinkLedsWithConfig();
@@ -206,12 +205,10 @@ void blink() {
     system("clear");
     printf("\nBlink...\n");
     int frequencies[NUMBER_OF_LEDS] = {0, 0};
-    // int dutyCycles[NUMBER_OF_LEDS] = {0, 0};
     int brightness[NUMBER_OF_LEDS] = {0, 0};
 
     int blinkLed = getBlinkLed();
     frequencies[blinkLed] = getBlinkFrequency(blinkLed);
-    // dutyCycles[blinkLed] = getBlinkDutyCycle(blinkLed);
     brightness[blinkLed] = getBlinkBrightness(blinkLed);
 
     if (confirmBlinkSelection(frequencies, brightness) == CONFIRM) {
@@ -225,12 +222,10 @@ void blinkAll() {
     system("clear");
     printf("\nBlink all LEDs...\n");
     int frequencies[NUMBER_OF_LEDS] = {0, 0};
-    // int dutyCycles[NUMBER_OF_LEDS] = {0, 0};
     int brightness[NUMBER_OF_LEDS] = {0, 0};
 
     for (int i = 0; i < NUMBER_OF_LEDS; i++) {
         frequencies[i] = getBlinkFrequency(i);
-        // dutyCycles[i] = getBlinkDutyCycle(i);
         brightness[i] = getBlinkBrightness(i);
     }
 
@@ -281,28 +276,6 @@ int getBlinkFrequency(int blinkLed) {
     }
 }
 
-// // Menu to get user selection on LED Duty Cycle
-// int getBlinkDutyCycle(int blinkLed) {
-//     int selection;
-//     if (blinkLed == BLINK_GREEN) {
-//         printf("Enter duty cycle for green LED.\n\n");
-//     } else {
-//         printf("Enter duty cycle for red LED.\n\n");
-//     }
-//     printf("Enter whole numbers between 0 to 100\n\n");
-//     printf("Duty Cycle (%%): ");
-//     scanf("%d", &selection);
-    
-//     if (selection < 0 || selection > 100) {
-//         system("clear");
-//         printf("Invalid Input. Try Again...\n\n");
-//         getBlinkDutyCycle(blinkLed);
-//     } else {
-//         system("clear");
-//         return selection;
-//     }
-// }
-
 // Menu to get user selection on LED Brightness/Duty Cycle
 int getBlinkBrightness(int blinkLed) {
     int selection;
@@ -338,7 +311,6 @@ int confirmBlinkSelection(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER
             }
             printf("%s LED\n", blinkLedString);
             printf("  - Frequency: %dHz\n", frequencies[i]);
-            // printf("  - Duty Cycle: %dHz\n", dutyCycles[i]);
             printf("  - Brightness: %d%%\n", brightness[i]);
         }
     }
