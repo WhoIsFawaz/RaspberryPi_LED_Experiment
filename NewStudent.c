@@ -214,7 +214,10 @@ void blink() {
     if (confirmBlinkSelection(frequencies, brightness) == CONFIRM) {
         blinkLedsWithConfig(frequencies, brightness);
         system("clear");
-    } else return;
+    } else {
+        system("clear");
+        return;
+    };
 }
 
 // When user wants to blink all LEDs, this function will get all the blinking configurations
@@ -232,7 +235,10 @@ void blinkAll() {
     if (confirmBlinkSelection(frequencies, brightness) == CONFIRM) {
         blinkLedsWithConfig(frequencies, brightness);
         system("clear");
-    } else return;
+    } else {
+        system("clear");
+        return;
+    };
 }
 
 // Menu to get user selection on which LED to blink
@@ -323,11 +329,8 @@ int confirmBlinkSelection(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER
     if (selection < 0 || selection > 1) {
         system("clear");
         printf("Invalid Input. Try Again...\n\n");
-        confirmBlinkSelection(frequencies, dutyCycles, brightness);
-    } else {
-        system("clear");
-        return selection;
-    }
+        confirmBlinkSelection(frequencies, brightness);
+    } else return selection;
 }
 
 // Blinks all the LED according to the user configuration
@@ -376,9 +379,9 @@ void blinkLedsWithConfig(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER_
                     blinkLed = RED;
                 }
 
-                if (dutyCycles[i] == 0) {
+                if (brightness[i] == 0) {
                     ledStates[i] = LOW;
-                } else if (dutyCycles[i] == 100) {
+                } else if (brightness[i] == 100) {
                     ledStates[i] = HIGH;
                 } else {
                     ledStates[i] = (ledStates[i] == LOW) ? HIGH : LOW;                      // Toggle the LED state between LOW and HIGH
