@@ -64,7 +64,7 @@ void blink();
 void blinkAll();
 int getBlinkLed();
 int getBlinkFrequency();
-int getBlinkDutyCycle();
+// int getBlinkDutyCycle();
 int getBlinkBrightness();
 int confirmBlinkSelection();
 void blinkLedsWithConfig();
@@ -206,16 +206,16 @@ void blink() {
     system("clear");
     printf("\nBlink...\n");
     int frequencies[NUMBER_OF_LEDS] = {0, 0};
+    // int dutyCycles[NUMBER_OF_LEDS] = {0, 0};
     int brightness[NUMBER_OF_LEDS] = {0, 0};
-    int dutyCycles[NUMBER_OF_LEDS] = {0, 0};
 
     int blinkLed = getBlinkLed();
     frequencies[blinkLed] = getBlinkFrequency(blinkLed);
-    dutyCycles[blinkLed] = getBlinkDutyCycle(blinkLed);
+    // dutyCycles[blinkLed] = getBlinkDutyCycle(blinkLed);
     brightness[blinkLed] = getBlinkBrightness(blinkLed);
 
-    if (confirmBlinkSelection(frequencies, dutyCycles, brightness) == CONFIRM) {
-        blinkLedsWithConfig(frequencies, dutyCycles, brightness);
+    if (confirmBlinkSelection(frequencies, brightness) == CONFIRM) {
+        blinkLedsWithConfig(frequencies, brightness);
         system("clear");
     } else return;
 }
@@ -225,17 +225,17 @@ void blinkAll() {
     system("clear");
     printf("\nBlink all LEDs...\n");
     int frequencies[NUMBER_OF_LEDS] = {0, 0};
-    int dutyCycles[NUMBER_OF_LEDS] = {0, 0};
+    // int dutyCycles[NUMBER_OF_LEDS] = {0, 0};
     int brightness[NUMBER_OF_LEDS] = {0, 0};
 
     for (int i = 0; i < NUMBER_OF_LEDS; i++) {
         frequencies[i] = getBlinkFrequency(i);
-        dutyCycles[i] = getBlinkDutyCycle(i);
+        // dutyCycles[i] = getBlinkDutyCycle(i);
         brightness[i] = getBlinkBrightness(i);
     }
 
-    if (confirmBlinkSelection(frequencies, dutyCycles, brightness) == CONFIRM) {
-        blinkLedsWithConfig(frequencies, dutyCycles, brightness);
+    if (confirmBlinkSelection(frequencies, brightness) == CONFIRM) {
+        blinkLedsWithConfig(frequencies, brightness);
         system("clear");
     } else return;
 }
@@ -281,27 +281,27 @@ int getBlinkFrequency(int blinkLed) {
     }
 }
 
-// Menu to get user selection on LED Duty Cycle
-int getBlinkDutyCycle(int blinkLed) {
-    int selection;
-    if (blinkLed == BLINK_GREEN) {
-        printf("Enter duty cycle for green LED.\n\n");
-    } else {
-        printf("Enter duty cycle for red LED.\n\n");
-    }
-    printf("Enter whole numbers between 0 to 100\n\n");
-    printf("Duty Cycle (%%): ");
-    scanf("%d", &selection);
+// // Menu to get user selection on LED Duty Cycle
+// int getBlinkDutyCycle(int blinkLed) {
+//     int selection;
+//     if (blinkLed == BLINK_GREEN) {
+//         printf("Enter duty cycle for green LED.\n\n");
+//     } else {
+//         printf("Enter duty cycle for red LED.\n\n");
+//     }
+//     printf("Enter whole numbers between 0 to 100\n\n");
+//     printf("Duty Cycle (%%): ");
+//     scanf("%d", &selection);
     
-    if (selection < 0 || selection > 100) {
-        system("clear");
-        printf("Invalid Input. Try Again...\n\n");
-        getBlinkDutyCycle(blinkLed);
-    } else {
-        system("clear");
-        return selection;
-    }
-}
+//     if (selection < 0 || selection > 100) {
+//         system("clear");
+//         printf("Invalid Input. Try Again...\n\n");
+//         getBlinkDutyCycle(blinkLed);
+//     } else {
+//         system("clear");
+//         return selection;
+//     }
+// }
 
 // Menu to get user selection on LED Brightness/Duty Cycle
 int getBlinkBrightness(int blinkLed) {
@@ -326,7 +326,7 @@ int getBlinkBrightness(int blinkLed) {
 }
 
 // Updated function to confirm the configuration for all LEDs
-int confirmBlinkSelection(int frequencies[NUMBER_OF_LEDS], int dutyCycles[NUMBER_OF_LEDS], int brightness[NUMBER_OF_LEDS]) {
+int confirmBlinkSelection(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER_OF_LEDS]) {
     int selection;
 
     printf("Confirm your blink configurations for the LEDs.\n\n");
@@ -338,7 +338,7 @@ int confirmBlinkSelection(int frequencies[NUMBER_OF_LEDS], int dutyCycles[NUMBER
             }
             printf("%s LED\n", blinkLedString);
             printf("  - Frequency: %dHz\n", frequencies[i]);
-            printf("  - Duty Cycle: %dHz\n", dutyCycles[i]);
+            // printf("  - Duty Cycle: %dHz\n", dutyCycles[i]);
             printf("  - Brightness: %d%%\n", brightness[i]);
         }
     }
@@ -359,7 +359,7 @@ int confirmBlinkSelection(int frequencies[NUMBER_OF_LEDS], int dutyCycles[NUMBER
 }
 
 // Blinks all the LED according to the user configuration
-void blinkLedsWithConfig(int frequencies[NUMBER_OF_LEDS], int dutyCycles[NUMBER_OF_LEDS], int brightness[NUMBER_OF_LEDS]) {
+void blinkLedsWithConfig(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER_OF_LEDS]) {
     printf("\nBlinking...\n");
 
     int onTimes[NUMBER_OF_LEDS] = {0, 0};
@@ -367,7 +367,7 @@ void blinkLedsWithConfig(int frequencies[NUMBER_OF_LEDS], int dutyCycles[NUMBER_
 
     // Calculate onTime and offTime based on the duty cycle (brightness)
     for (int i = 0; i < NUMBER_OF_LEDS; i++) {
-        float dutyCycle = (float)dutyCycles[i] / 100.0f;                    // Calculate duty cycle based on the user's input (brightness)
+        float dutyCycle = (float)brightness[i] / 100.0f;                    // Calculate duty cycle based on the user's input (brightness)
         float cycleTime = (1.0f / frequencies[i]) * 1000.0f;                // Calculate the time for one cycle based on the user's input (frequency)
         onTimes[i] = cycleTime * dutyCycle;                                 // Calculate the on-time in milliseconds based on duty cycle
         offTimes[i] = cycleTime * (1.0f - dutyCycle);                       // Calculate the off-time in milliseconds based on duty cycle
@@ -420,11 +420,11 @@ void blinkLedsWithConfig(int frequencies[NUMBER_OF_LEDS], int dutyCycles[NUMBER_
 
                 if (blinkLed == GREEN) {
                     data.greenState = ledStates[i];                                            // If the green LED is blinking, update the green LED state in the waveform data
-                    writeWaveformDataGreen(data, frequencies[i], dutyCycles[i]);               // Record green led data to csv file
+                    writeWaveformDataGreen(data, frequencies[i], brightness[i]);               // Record green led data to csv file
                     greenTimestamp += (ledStates[i] == HIGH) ? onTimes[i] : offTimes[i];       // Update the green LED timestamp
                 } else {
                     data.redState = ledStates[i];                                              // If the red LED is blinking, update the red LED state in the waveform data
-                    writeWaveformDataRed(data, frequencies[i], dutyCycles[i]);                 // Record red led data to csv file
+                    writeWaveformDataRed(data, frequencies[i], brightness[i]);                 // Record red led data to csv file
                     redTimestamp += (ledStates[i] == HIGH) ? onTimes[i] : offTimes[i];         // Update the red LED timestamp
                 }
             }
