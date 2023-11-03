@@ -217,7 +217,10 @@ void blink() {
     if (confirmBlinkSelection(frequencies, dutyCycles, brightness) == CONFIRM) {
         blinkLedsWithConfig(frequencies, dutyCycles, brightness);
         system("clear");
-    } else return;
+    } else {
+        system("clear");
+        return;
+    };
 }
 
 // When user wants to blink all LEDs, this function will get all the blinking configurations
@@ -237,7 +240,10 @@ void blinkAll() {
     if (confirmBlinkSelection(frequencies, dutyCycles, brightness) == CONFIRM) {
         blinkLedsWithConfig(frequencies, dutyCycles, brightness);
         system("clear");
-    } else return;
+    } else {
+        system("clear");
+        return;
+    };
 }
 
 // Menu to get user selection on which LED to blink
@@ -353,7 +359,6 @@ int confirmBlinkSelection(int frequencies[NUMBER_OF_LEDS], int dutyCycles[NUMBER
         printf("Invalid Input. Try Again...\n\n");
         confirmBlinkSelection(frequencies, dutyCycles, brightness);
     } else {
-        system("clear");
         return selection;
     }
 }
