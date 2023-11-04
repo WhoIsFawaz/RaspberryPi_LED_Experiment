@@ -217,7 +217,7 @@ void blink() {
     } else {
         system("clear");
         return;
-    };
+    }
 }
 
 // When user wants to blink all LEDs, this function will get all the blinking configurations
@@ -238,15 +238,15 @@ void blinkAll() {
     } else {
         system("clear");
         return;
-    };
+    }
 }
 
 // Menu to get user selection on which LED to blink
 int getBlinkLed() {
     int selection;
     printf("\nSelect LED to blink.\n\n");
-    printf("[0] Green LED\n");
-    printf("[1] Red LED\n");
+    printf("[%i] Green LED\n", BLINK_GREEN);
+    printf("[%i] Red LED\n", BLINK_RED);
     printf("\nYour Selection: ");
     scanf("%d", &selection);
     
@@ -387,8 +387,8 @@ void blinkLedsWithConfig(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER_
                     ledStates[i] = (ledStates[i] == LOW) ? HIGH : LOW;                      // Toggle the LED state between LOW and HIGH
                 }
 
-                softPwmWrite(blinkLed, ledStates[i] == HIGH ? brightness[i] : 0);      // Set the LED brightness based on its state
-                digitalWrite(blinkLed, ledStates[i]);                                  // Update the physical state of the LED    
+                softPwmWrite(blinkLed, ledStates[i] == HIGH ? brightness[i] : 0);           // Set the LED brightness based on its state
+                digitalWrite(blinkLed, ledStates[i]);                                       // Update the physical state of the LED    
 
                 // Record waveform data
                 data.timestamp = (blinkLed == GREEN) ? greenTimestamp : redTimestamp;
