@@ -30,7 +30,7 @@ GROUND
 #include <string.h>
 
 // Definitions
-#define NUMBER_OF_LEDS 2
+#define NUMBER_OF_LEDS 2 // Define total number of leds
 
 #define RED 27      // GPIO Pin 27
 #define GREEN 13    // GPIO Pin 13
@@ -45,7 +45,7 @@ GROUND
 #define BLINK_ALL 3
 #define EXIT 4
 
-// LED Blink Selection/position in array
+// LED Blink Selection / position in array
 #define BLINK_GREEN 0
 #define BLINK_RED 1
 #define CONFIRM 1
@@ -85,12 +85,12 @@ void writeWaveformDataGreen(WaveformData data, int blinkFrequency, int blinkDuty
 
     if (file != NULL) {
         if (!headersWrittenGreen) {
-            file = freopen(NULL, "w", file);
+            file = freopen(NULL, "w", file); // New updates to the file will be written over the existing contents in the file
             fprintf(file, "Frequency of Green LED is: %dHz & Duty Cycle of Green LED is: %d%%\n\n", blinkFrequency, blinkDutyCycle); 
             fprintf(file, "The timestamp in Millisecond | The state of the Green LED\n");
             headersWrittenGreen = 1;
         }
-        fprintf(file, "              %d          ,             %d\n", data.timestamp, data.greenState);
+        fprintf(file, "              %d          ,             %d\n", data.timestamp, data.greenState); // The large spacing in between is for neater looks in the CSV file
         fclose(file);
     }
 }
@@ -101,12 +101,12 @@ void writeWaveformDataRed(WaveformData data, int blinkFrequency, int blinkDutyCy
 
     if (file != NULL) {
         if (!headersWrittenRed) {
-            file = freopen(NULL, "w", file);
+            file = freopen(NULL, "w", file); // New updates to the file will be written over the existing contents in the file
             fprintf(file, "Frequency of Red LED is: %dHz & Duty Cycle of Red LED is: %d%%\n\n", blinkFrequency, blinkDutyCycle); 
             fprintf(file, "The timestamp in Millisecond | The state of the Red LED\n");
             headersWrittenRed = 1;
         }
-        fprintf(file, "              %d          ,             %d\n", data.timestamp, data.redState);
+        fprintf(file, "              %d          ,             %d\n", data.timestamp, data.redState); // The large spacing in between is for neater looks in the CSV file
         fclose(file);
     }
 }
@@ -138,19 +138,19 @@ void startProgram() {
 
         switch(selection) {
             case TURN_OFF:
-                turnOffLeds();
+                turnOffLeds(); // Off both led for troubleshooting purposes
                 break;
             case TURN_ON:
-                turnOnLeds();
+                turnOnLeds(); // On both led for troubleshooting purposes
                 break;
             case BLINK:
-                blink();
+                blink();      // On single led
                 break;
             case BLINK_ALL:
-                blinkAll();
+                blinkAll();   // On both led
                 break;
             case EXIT:
-                break;
+                break;        // Exit the programme
             default:
                 printf("\nInvalid Input. Try Again...\n");
                 break;
@@ -200,7 +200,7 @@ void turnOnLeds() {
     softPwmWrite(RED, 100);
 }
 
-// When user wants to blink LED, this function will get all the blinking configurations
+// When user wants to blink single LED, this function will get all the blinking configurations
 void blink() {
     system("clear");
     printf("\nBlink...\n");
@@ -220,7 +220,7 @@ void blink() {
     }
 }
 
-// When user wants to blink all LEDs, this function will get all the blinking configurations
+// When user wants to blink both LEDs, this function will get all the blinking configurations
 void blinkAll() {
     system("clear");
     printf("\nBlink all LEDs...\n");
@@ -364,27 +364,27 @@ void blinkLedsWithConfig(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER_
 
     // Inside the while loop to control LED blinking
     while (1) {
-        unsigned long currentMillis = millis();
+        unsigned long currentMillis = millis();  // Get the current time in milliseconds
 
         // Check if it's time to change the LED state (on or off)
         for (int i = 0; i < NUMBER_OF_LEDS; i++) {
             if (currentMillis - previousMillis[i] >= (ledStates[i] == LOW ? offTimes[i] : onTimes[i])) {
-                previousMillis[i] = currentMillis;
+                previousMillis[i] = currentMillis;  // Update the previousMillis to the current time
 
-                // Setting Blink LED
+                // Determine which LED is currently being blinked
                 int blinkLed = 0;
                 if (i == BLINK_GREEN) {
-                    blinkLed = GREEN;
+                    blinkLed = GREEN;   // Set the LED to green if i represents the green LED
                 } else {
-                    blinkLed = RED;
+                    blinkLed = RED;     // Set the LED to red if i represents the red LED
                 }
 
                 if (brightness[i] == 0) {
-                    ledStates[i] = LOW;
+                    ledStates[i] = LOW;             // If brightness is set to 0, turn the LED off
                 } else if (brightness[i] == 100) {
-                    ledStates[i] = HIGH;
+                    ledStates[i] = HIGH;            // If brightness is set to 100, turn the LED on at full intensity
                 } else {
-                    ledStates[i] = (ledStates[i] == LOW) ? HIGH : LOW;                      // Toggle the LED state between LOW and HIGH
+                    ledStates[i] = (ledStates[i] == LOW) ? HIGH : LOW;  // Toggle the LED state between LOW and HIGH based on the current state
                 }
 
                 softPwmWrite(blinkLed, ledStates[i] == HIGH ? brightness[i] : 0);           // Set the LED brightness based on its state
