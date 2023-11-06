@@ -13,8 +13,8 @@ Check wiringPi version: gpio -v
 Check GPIO status: gpio readall
 
 === GPIO PIN CONNECTION ===
-27 GREEN LED
-13 RED LED
+13 GREEN_PIN LED
+27 RED_PIN LED
 GROUND
 
 GPIO14 to Monitor GPIO15
@@ -30,10 +30,16 @@ GROUND
 #include <string.h>
 
 // Definitions
+#define CONFIRM 1
+
 #define NUMBER_OF_LEDS 2 // Define total number of leds
 
-#define RED 27      // GPIO Pin 27
-#define GREEN 13    // GPIO Pin 13
+#define GREEN_PIN 13    // GPIO Pin 13
+#define RED_PIN 27      // GPIO Pin 27
+
+// LED Blink Selection / position in array
+#define GREEN 0
+#define RED 1
 
 #define TIMESTAMP_START 10000   // Start of timestamp
 #define BLINK_DURATION 60       // Duration of in seconds
@@ -44,11 +50,6 @@ GROUND
 #define BLINK 2
 #define BLINK_ALL 3
 #define EXIT 4
-
-// LED Blink Selection / position in array
-#define BLINK_GREEN 0
-#define BLINK_RED 1
-#define CONFIRM 1
 
 // File to store waveform data
 #define WAV_FILEGreen "green_waveform_data.csv"
@@ -67,49 +68,8 @@ int getBlinkFrequency();
 int getBlinkBrightness();
 int confirmBlinkSelection();
 void blinkLedsWithConfig();
+void writeWaveformData();
 void endProgram();
-
-// Define a structure to hold waveform data
-int headersWrittenGreen = 0;
-int headersWrittenRed = 0;
-
-typedef struct {
-    int timestamp;  // Time in milliseconds
-    int greenState; // State of the green LED
-    int redState;   // State of the red LED
-} WaveformData;
-
-/* Add a function to write waveform data of GREEN LED to the file */
-void writeWaveformDataGreen(WaveformData data, int blinkFrequency, int blinkDutyCycle) {
-    FILE *file = fopen(WAV_FILEGreen, "a"); // Open file in append mode
-
-    if (file != NULL) {
-        if (!headersWrittenGreen) {
-            file = freopen(NULL, "w", file); // New updates to the file will be written over the existing contents in the file
-            fprintf(file, "Frequency of Green LED is: %dHz & Duty Cycle of Green LED is: %d%%\n\n", blinkFrequency, blinkDutyCycle); 
-            fprintf(file, "The timestamp in Millisecond | The state of the Green LED\n");
-            headersWrittenGreen = 1;
-        }
-        fprintf(file, "              %d          ,             %d\n", data.timestamp, data.greenState); // The large spacing in between is for neater looks in the CSV file
-        fclose(file);
-    }
-}
-
-/* Add a function to write waveform data of RED LED to the file */
-void writeWaveformDataRed(WaveformData data, int blinkFrequency, int blinkDutyCycle) {
-    FILE *file = fopen(WAV_FILERed, "a"); // Open file in append mode
-
-    if (file != NULL) {
-        if (!headersWrittenRed) {
-            file = freopen(NULL, "w", file); // New updates to the file will be written over the existing contents in the file
-            fprintf(file, "Frequency of Red LED is: %dHz & Duty Cycle of Red LED is: %d%%\n\n", blinkFrequency, blinkDutyCycle); 
-            fprintf(file, "The timestamp in Millisecond | The state of the Red LED\n");
-            headersWrittenRed = 1;
-        }
-        fprintf(file, "              %d          ,             %d\n", data.timestamp, data.redState); // The large spacing in between is for neater looks in the CSV file
-        fclose(file);
-    }
-}
 
 // Main Programme
 int main(void) {
@@ -122,10 +82,10 @@ int main(void) {
 // Sets up the LED GPIO pins as output and PWM
 void setupProgram() {
     wiringPiSetupGpio();
-    pinMode(RED, OUTPUT);
-    pinMode(GREEN, OUTPUT);
-    softPwmCreate(GREEN, 0, 100);
-    softPwmCreate(RED, 0, 100);
+    pinMode(RED_PIN, OUTPUT);
+    pinMode(GREEN_PIN, OUTPUT);
+    softPwmCreate(GREEN_PIN, 0, 100);
+    softPwmCreate(RED_PIN, 0, 100);
     system("clear");
 }
 
@@ -147,7 +107,7 @@ void startProgram() {
                 blink();      // On single led
                 break;
             case BLINK_ALL:
-                blinkAll();   // On both led
+                blinkAll();   // On all led
                 break;
             case EXIT:
                 break;        // Exit the programme
@@ -184,20 +144,20 @@ int getUserSelection() {
 void turnOffLeds() {
     system("clear");
     printf("\nTurning off all LEDs...\n");
-    digitalWrite(GREEN, LOW);
-    softPwmWrite(GREEN, 0);
-    digitalWrite(RED, LOW);
-    softPwmWrite(RED, 0);
+    digitalWrite(GREEN_PIN, LOW);
+    softPwmWrite(GREEN_PIN, 0);
+    digitalWrite(RED_PIN, LOW);
+    softPwmWrite(RED_PIN, 0);
 }
 
 // For troubleshooting, turning on LEDs and PWM. Use this to test the connection of your LED and Pi
 void turnOnLeds() {
     system("clear");
     printf("\nTurning on all LEDs...\n");
-    digitalWrite(GREEN, HIGH);
-    softPwmWrite(GREEN, 100);
-    digitalWrite(RED, HIGH);
-    softPwmWrite(RED, 100);
+    digitalWrite(GREEN_PIN, HIGH);
+    softPwmWrite(GREEN_PIN, 100);
+    digitalWrite(RED_PIN, HIGH);
+    softPwmWrite(RED_PIN, 100);
 }
 
 // When user wants to blink single LED, this function will get all the blinking configurations
@@ -207,9 +167,9 @@ void blink() {
     int frequencies[NUMBER_OF_LEDS] = {0, 0};
     int brightness[NUMBER_OF_LEDS] = {0, 0};
 
-    int blinkLed = getBlinkLed();
-    frequencies[blinkLed] = getBlinkFrequency(blinkLed);
-    brightness[blinkLed] = getBlinkBrightness(blinkLed);
+    int led = getBlinkLed();
+    frequencies[led] = getBlinkFrequency(led);
+    brightness[led] = getBlinkBrightness(led);
 
     if (confirmBlinkSelection(frequencies, brightness) == CONFIRM) {
         blinkLedsWithConfig(frequencies, brightness);
@@ -224,8 +184,8 @@ void blink() {
 void blinkAll() {
     system("clear");
     printf("\nBlink all LEDs...\n");
-    int frequencies[NUMBER_OF_LEDS] = {0, 0};
-    int brightness[NUMBER_OF_LEDS] = {0, 0};
+    unsigned int frequencies[NUMBER_OF_LEDS] = {0, 0};
+    unsigned int brightness[NUMBER_OF_LEDS] = {0, 0};
 
     for (int i = 0; i < NUMBER_OF_LEDS; i++) {
         frequencies[i] = getBlinkFrequency(i);
@@ -245,12 +205,12 @@ void blinkAll() {
 int getBlinkLed() {
     int selection;
     printf("\nSelect LED to blink.\n\n");
-    printf("[%i] Green LED\n", BLINK_GREEN);
-    printf("[%i] Red LED\n", BLINK_RED);
+    printf("[%i] Green LED\n", GREEN);
+    printf("[%i] Red LED\n", RED);
     printf("\nYour Selection: ");
     scanf("%d", &selection);
     
-    if (selection != BLINK_GREEN && selection != BLINK_RED) {
+    if (selection != GREEN && selection != RED) {
         system("clear");
         printf("Invalid Input. Try Again...\n\n");
         getBlinkLed();
@@ -261,9 +221,9 @@ int getBlinkLed() {
 }
 
 // Menu to get user selection on LED Frequency
-int getBlinkFrequency(int blinkLed) {
+int getBlinkFrequency(int led) {
     int selection;
-    if (blinkLed == BLINK_GREEN) {
+    if (led == GREEN) {
         printf("Enter frequency to blink green LED.\n\n");
     } else {
         printf("Enter frequency to blink red LED.\n\n");
@@ -275,7 +235,7 @@ int getBlinkFrequency(int blinkLed) {
     if (selection < 0 || selection > 10) {
         system("clear");
         printf("Invalid Input. Try Again...\n\n");
-        getBlinkFrequency(blinkLed);
+        getBlinkFrequency(led);
     } else {
         system("clear");
         return selection;
@@ -283,9 +243,9 @@ int getBlinkFrequency(int blinkLed) {
 }
 
 // Menu to get user selection on LED Brightness/Duty Cycle
-int getBlinkBrightness(int blinkLed) {
+int getBlinkBrightness(int led) {
     int selection;
-    if (blinkLed == BLINK_GREEN) {
+    if (led == GREEN) {
         printf("Enter brightness to blink green LED.\n\n");
     } else {
         printf("Enter brightness to blink red LED.\n\n");
@@ -297,7 +257,7 @@ int getBlinkBrightness(int blinkLed) {
     if (selection < 0 || selection > 100) {
         system("clear");
         printf("Invalid Input. Try Again...\n\n");
-        getBlinkBrightness(blinkLed);
+        getBlinkBrightness(led);
     } else {
         system("clear");
         return selection;
@@ -305,14 +265,14 @@ int getBlinkBrightness(int blinkLed) {
 }
 
 // Updated function to confirm the configuration for all LEDs
-int confirmBlinkSelection(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER_OF_LEDS]) {
+int confirmBlinkSelection(unsigned int frequencies[NUMBER_OF_LEDS], unsigned int brightness[NUMBER_OF_LEDS]) {
     int selection;
 
     printf("Confirm your blink configurations for the LEDs.\n\n");
     for (int i = 0; i < NUMBER_OF_LEDS; i++) {
         if (frequencies[i] != 0 && brightness[i] != 0) {
             char blinkLedString[] = "Green";
-            if (i == BLINK_RED) {
+            if (i == RED) {
                 strcpy(blinkLedString, "Red");
             }
             printf("%s LED\n", blinkLedString);
@@ -334,11 +294,11 @@ int confirmBlinkSelection(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER
 }
 
 // Blinks all the LED according to the user configuration
-void blinkLedsWithConfig(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER_OF_LEDS]) {
+void blinkLedsWithConfig(unsigned int frequencies[NUMBER_OF_LEDS], unsigned int brightness[NUMBER_OF_LEDS]) {
     printf("\nBlinking...\n");
 
-    int onTimes[NUMBER_OF_LEDS] = {0, 0};
-    int offTimes[NUMBER_OF_LEDS] = {0, 0};
+    unsigned int onTimes[NUMBER_OF_LEDS] = {0, 0};
+    unsigned int offTimes[NUMBER_OF_LEDS] = {0, 0};
 
     // Calculate onTime and offTime based on the duty cycle (brightness)
     for (int i = 0; i < NUMBER_OF_LEDS; i++) {
@@ -348,14 +308,8 @@ void blinkLedsWithConfig(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER_
         offTimes[i] = cycleTime * (1.0f - dutyCycle);                       // Calculate the off-time in milliseconds based on duty cycle
     }
 
-    // Initialize waveform data
-    WaveformData data;
-    data.greenState = 0;
-    data.redState = 0;
-
     // Initialize timestamps for both LEDs
-    unsigned long greenTimestamp = TIMESTAMP_START;  // Start at 10,000 ms - this will ensure neater representation of the recorded data in the csv
-    unsigned long redTimestamp = TIMESTAMP_START;    // Start at 10,000 ms - this will ensure neater representation of the recorded data in the csv
+    unsigned long timestamps[] = {TIMESTAMP_START, TIMESTAMP_START};  // Start at 10,000 ms - this will ensure neater representation of the recorded data in the csv
     unsigned long timestampLimit = TIMESTAMP_START + (BLINK_DURATION * 1000);  // Set the timestamp limit to 70,000 ms - this will ensure the LED will run for 60 seconds
 
     // Blinking
@@ -371,14 +325,6 @@ void blinkLedsWithConfig(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER_
             if (currentMillis - previousMillis[i] >= (ledStates[i] == LOW ? offTimes[i] : onTimes[i])) {
                 previousMillis[i] = currentMillis;  // Update the previousMillis to the current time
 
-                // Determine which LED is currently being blinked
-                int blinkLed = 0;
-                if (i == BLINK_GREEN) {
-                    blinkLed = GREEN;   // Set the LED to green if i represents the green LED
-                } else {
-                    blinkLed = RED;     // Set the LED to red if i represents the red LED
-                }
-
                 if (brightness[i] == 0) {
                     ledStates[i] = LOW;             // If brightness is set to 0, turn the LED off
                 } else if (brightness[i] == 100) {
@@ -387,28 +333,51 @@ void blinkLedsWithConfig(int frequencies[NUMBER_OF_LEDS], int brightness[NUMBER_
                     ledStates[i] = (ledStates[i] == LOW) ? HIGH : LOW;  // Toggle the LED state between LOW and HIGH based on the current state
                 }
 
-                softPwmWrite(blinkLed, ledStates[i] == HIGH ? brightness[i] : 0);           // Set the LED brightness based on its state
-                digitalWrite(blinkLed, ledStates[i]);                                       // Update the physical state of the LED    
-
-                // Record waveform data
-                data.timestamp = (blinkLed == GREEN) ? greenTimestamp : redTimestamp;
-
-                if (blinkLed == GREEN) {
-                    data.greenState = ledStates[i];                                            // If the green LED is blinking, update the green LED state in the waveform data
-                    writeWaveformDataGreen(data, frequencies[i], brightness[i]);               // Record green led data to csv file
-                    greenTimestamp += (ledStates[i] == HIGH) ? onTimes[i] : offTimes[i];       // Update the green LED timestamp
+                // Determine which LED is currently being blinked
+                int ledPin = 0;
+                if (i == GREEN) {
+                    ledPin = GREEN_PIN;   // Set the LED to green if i represents the green LED
                 } else {
-                    data.redState = ledStates[i];                                              // If the red LED is blinking, update the red LED state in the waveform data
-                    writeWaveformDataRed(data, frequencies[i], brightness[i]);                 // Record red led data to csv file
-                    redTimestamp += (ledStates[i] == HIGH) ? onTimes[i] : offTimes[i];         // Update the red LED timestamp
+                    ledPin = RED_PIN;     // Set the LED to red if i represents the red LED
                 }
+
+                softPwmWrite(ledPin, ledStates[i] == HIGH ? brightness[i] : 0);           // Set the LED brightness based on its state
+                digitalWrite(ledPin, ledStates[i]);                                       // Update the physical state of the LED
+
+                writeWaveformData(i, timestamps[i], ledStates[i], frequencies[i], brightness[i]);               // Record  led data to csv file
+                timestamps[i] += (ledStates[i] == HIGH) ? onTimes[i] : offTimes[i];                                  // Update the  LED timestamp
             }
-        } 
+        }
 
         // Check if the timestamp limit is reached, and exit the loop if true
-        if (data.timestamp >= timestampLimit) {
+        if (timestamps[0] >= timestampLimit) {
             break;
         }
+    }
+}
+
+/* Add a function to write waveform data of GREEN_PIN LED to the file */
+void writeWaveformData(unsigned int led, unsigned long timestamp, unsigned int state, unsigned int blinkFrequency, unsigned int blinkDutyCycle) {
+    static int headersWritten[] = {0, 0};
+    char ledString[] = "Green";
+    FILE *file;
+
+    if (led == GREEN) {
+        file = fopen(WAV_FILEGreen, "a"); // Open file in append mode
+    } else {
+        file = fopen(WAV_FILERed, "a"); // Open file in append mode
+        strcpy(ledString, "Red");
+    }
+
+    if (file != NULL) {
+        if (!headersWritten[led]) {
+            file = freopen(NULL, "w", file); // New updates to the file will be written over the existing contents in the file
+            fprintf(file, "Frequency of %s LED is: %dHz & Duty Cycle of %s LED is: %d%%\n\n", ledString, blinkFrequency, ledString, blinkDutyCycle); 
+            fprintf(file, "The timestamp in Millisecond | The state of the %s LED\n", ledString);
+            headersWritten[led] = 1;
+        }
+        fprintf(file, "              %d          ,             %d\n", timestamp, state); // The large spacing in between is for neater looks in the CSV file
+        fclose(file);
     }
 }
 
@@ -418,16 +387,16 @@ void endProgram() {
     printf("\nCleaning Up...\n");
 
     // Turn Off LEDs
-    digitalWrite(GREEN, LOW);
-    digitalWrite(RED, LOW);
+    digitalWrite(GREEN_PIN, LOW);
+    digitalWrite(RED_PIN, LOW);
 
-    // Turn Off LED Software PWM
-    softPwmWrite(GREEN, 0);
-    softPwmWrite(RED, 0);
+    // Turn Off LED Software PWMSS
+    softPwmWrite(GREEN_PIN, 0);
+    softPwmWrite(RED_PIN, 0);
 
     // Reset Pins to Original INPUT State
-    pinMode(GREEN, INPUT);
-    pinMode(RED, INPUT);
+    pinMode(GREEN_PIN, INPUT);
+    pinMode(RED_PIN, INPUT);
 
     printf("Bye!\n\n");
 }
