@@ -43,7 +43,6 @@ GROUND
 // DON'T CHANGE UNLESS YOU KNOW WHAT YOU'RE DOING
 #define GREEN 0
 #define RED 1
-
 #define NUMBER_OF_LEDS 2 // Define total number of LEDs (used to define the length of arrays containing LEDs)
 
 #define TIMESTAMP_START 10000 // Start of timestamp
@@ -285,7 +284,7 @@ int getBlinkBrightness(int led)
     {
         printf("Enter brightness to blink green LED.\n\n");
     }
-    else
+    else if (led == RED)
     {
         printf("Enter brightness to blink red LED.\n\n");
     }
